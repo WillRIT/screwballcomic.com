@@ -7,47 +7,153 @@
 		<style>
 			:root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;color-scheme: dark}
 			html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
-			body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#071024 0%,#0b1220 100%);color:#e6eef6}
+			
+			body{
+				display:flex;
+				align-items:center;
+				justify-content:center;
+				background:linear-gradient(180deg,#071024 0%,#0b1220 100%);
+				color:#e6eef6;
+			}
+			
 			.wrap{max-width:720px;padding:28px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));box-shadow:0 10px 30px rgba(2,6,23,.6);text-align:center}
-			h1{margin:0 0 8px;font-size:20px;letter-spacing:-0.02em}
-			p.lead{margin:0 0 20px;color:var(--muted)}
-			.countdown{display:flex;gap:12px;justify-content:center;align-items:stretch}
-			.card{background:rgba(255,255,255,0.03);padding:14px 18px;border-radius:8px;min-width:80px}
-			.num{font-size:28px;font-weight:700;line-height:1}
-			.label{font-size:12px;color:var(--muted);margin-top:6px}
-			#message{margin-top:16px;color:var(--muted);font-size:14px}
-			@media (max-width:520px){.countdown{flex-wrap:wrap}.card{min-width:62px}}
 
-            img { 
-                max-width: 300px; 
-                margin-bottom: 20px; 
-            }
+			/* Use a simple 3-column grid so we can place items in the second column */
+			.wrap{display:grid;grid-template-columns:1fr min(720px,70vw) 1fr;grid-template-rows:auto auto;gap:12px;align-items:center}
+			
+			h1{margin:0 0 8px;font-size:20px;letter-spacing:-0.02em}
+			
+			p.lead{margin:0 0 20px;color:var(--muted)}
+			
+			.countdown{display:flex;gap:6px;justify-content:center;align-items:stretch}
+			
+			.card{background:rgba(255,255,255,0.03);padding:16px 20px;border-radius:8px;min-width:92px}
+			
+			.num{font-size:40px;font-weight:700;line-height:1}
+			
+			.label{font-size:12px;color:var(--muted);margin-top:6px}
+			
+			#message{margin-top:16px;color:var(--muted);font-size:14px}
+			
+			@media (max-width:520px){
+				.countdown{flex-wrap:wrap}
+				.card{min-width:60px;padding:10px 12px}
+				.num{font-size:20px}
+				.clock{width: min(300px, 80vw)}
+				.clock .countdown{width:84%}
+			}
+
+			/* Header: logo + title centered in the second column */
+			.header{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+
+			.logo-img {
+				max-width: 300px;
+				display: block;
+			}
+
+			.site-title{margin:0;font-size:22px;letter-spacing:-0.02em}
+
+			/* Clock container: larger so embedded images and cards fit comfortably */
+			.clock {
+				position: relative;
+				/* ensure the clock sits in the middle column */
+				grid-column:2;
+				grid-row:2;
+				width: min(520px, 80vw);
+				max-width: 640px;
+				aspect-ratio: 1 / 1; /* keep square */
+				margin: 0 auto 18px;
+				background-image: url('images/timerFill.png');
+				/* scale the background to fill most of the container while preserving aspect */
+				background-size: 92% auto;
+				background-repeat: no-repeat;
+				background-position: center;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.clock .countdown {
+				position: relative;
+				z-index: 2;
+				/* let the countdown size naturally, we'll scale it with JS to fit the clock face */
+				width: auto;
+				display:flex;
+				gap:12px;
+				justify-content: center;
+				align-items:center;
+				transform-origin: center center;
+				transition: transform 160ms ease;
+			}
+
+			.clock-outline {
+				position: absolute;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				object-fit: contain;
+				z-index: 3;
+				pointer-events: none;
+			}
+
+			/* Local font - use @font-face with a quoted URL (filename contains spaces) */
+		@font-face {
+				font-family: 'Rawer Condensed';
+				src: url('fonts/Rawer Condensed Bold.otf') format('opentype');
+				font-weight: 700;
+				font-style: normal;
+				font-display: swap;
+			}
+		
+		@font-face {
+			font-family: 'TT Octosquares';
+			src: url('fonts/TT Octosquares Trial Compressed Light.ttf') format('truetype');
+			font-weight: 700;
+			font-style: normal;
+			font-display: swap;
+		}
+	
+			/* Apply the custom font to the countdown numbers */
+			#days, #hours, #minutes, #seconds {
+				font-family: 'Rawer Condensed', sans-serif;
+				color: rgb(0, 187, 255);
+			}
+
+			#days-label, #hours-label, #minutes-label, #seconds-label{
+				font-family: 'TT Octosquares', sans-serif;
+				color: rgb(0, 187, 255);
+			}
 		</style>
 	</head>
 	<body>
-		<div class="wrap">
-			<img src="Screwball_Logo_Screwball_White.png">
-
-			<div class="countdown" aria-live="polite" aria-atomic="true">
-				<div class="card" role="group" aria-labelledby="days-label">
-					<div id="days" class="num">—</div>
-					<div id="days-label" class="label">Days</div>
+			<div class="wrap">
+				<div class="header">
+					<img class="logo-img" src="images/Screwball_Logo_Screwball_White.png" alt="Screwball logo">
 				</div>
 
-				<div class="card" role="group" aria-labelledby="hours-label">
-					<div id="hours" class="num">—</div>
-					<div id="hours-label" class="label">Hours</div>
-				</div>
+			<div class="clock" role="img" aria-label="Countdown clock to Nov 28, 2025 5:00 PM PST">
+				<div class="countdown" aria-live="polite" aria-atomic="true">
+					<div class="card" role="group" aria-labelledby="days-label">
+						<div id="days" class="num">—</div>
+						<div id="days-label" class="label">Days</div>
+					</div>
 
-				<div class="card" role="group" aria-labelledby="minutes-label">
-					<div id="minutes" class="num">—</div>
-					<div id="minutes-label" class="label">Minutes</div>
-				</div>
+					<div class="card" role="group" aria-labelledby="hours-label">
+						<div id="hours" class="num">—</div>
+						<div id="hours-label" class="label">Hours</div>
+					</div>
 
-				<div class="card" role="group" aria-labelledby="seconds-label">
-					<div id="seconds" class="num">—</div>
-					<div id="seconds-label" class="label">Seconds</div>
+					<div class="card" role="group" aria-labelledby="minutes-label">
+						<div id="minutes" class="num">—</div>
+						<div id="minutes-label" class="label">Minutes</div>
+					</div>
+
+					<div class="card" role="group" aria-labelledby="seconds-label">
+						<div id="seconds" class="num">—</div>
+						<div id="seconds-label" class="label">Seconds</div>
+					</div>
 				</div>
+				<img class="clock-outline" src="images/timerOutline.png" alt="" aria-hidden="true" />
 			</div>
 		</div>
 
@@ -62,6 +168,38 @@
 			const elMinutes = document.getElementById('minutes');
 			const elSeconds = document.getElementById('seconds');
 			const elMessage = document.getElementById('message');
+
+			// element refs for scaling countdown to fit the clock face
+			const clockEl = document.querySelector('.clock');
+			const countdownEl = clockEl ? clockEl.querySelector('.countdown') : null;
+
+			// background-size percentage used in CSS (must match .clock background-size)
+			const BG_SIZE_PERCENT = 0.92; // 92% as used above
+
+			function adjustCountdownScale() {
+				if (!clockEl || !countdownEl) return;
+				// measured available width from the background image inside the clock
+				const clockWidth = clockEl.clientWidth;
+				const availableBgWidth = clockWidth * BG_SIZE_PERCENT;
+				// use a fraction of the background width to avoid touching the outline; tweak as needed
+				const paddingFraction = 0.78;
+				const maxAllowed = availableBgWidth * paddingFraction;
+
+				// natural width of countdown content
+				const natural = countdownEl.scrollWidth;
+				let scale = 1;
+				if (natural > maxAllowed && natural > 0) {
+					scale = maxAllowed / natural;
+				}
+				countdownEl.style.transform = `scale(${scale})`;
+			}
+
+			// watch for resize and layout changes
+			window.addEventListener('resize', adjustCountdownScale);
+			if (window.ResizeObserver && clockEl) {
+				const ro = new ResizeObserver(adjustCountdownScale);
+				ro.observe(clockEl);
+			}
 
 			function plural(n, word){
 				return n === 1 ? word : word + 's';
@@ -101,6 +239,13 @@
 
 			updateCountdown();
 			const timer = setInterval(updateCountdown, 1000);
+
+			// ensure countdown is sized to fit at startup and whenever numbers change
+			// call adjust after a small timeout to let fonts and layout settle
+			setTimeout(adjustCountdownScale, 50);
+			// also adjust after every countdown tick in case digit widths change
+			const scaleInterval = setInterval(adjustCountdownScale, 500);
+
 		</script>
 	</body>
 </html>
