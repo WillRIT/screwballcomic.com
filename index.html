@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Screwball</title>
+		<style>
+			:root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;color-scheme: dark}
+			html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+			body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#071024 0%,#0b1220 100%);color:#e6eef6}
+			.wrap{max-width:720px;padding:28px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));box-shadow:0 10px 30px rgba(2,6,23,.6);text-align:center}
+			h1{margin:0 0 8px;font-size:20px;letter-spacing:-0.02em}
+			p.lead{margin:0 0 20px;color:var(--muted)}
+			.countdown{display:flex;gap:12px;justify-content:center;align-items:stretch}
+			.card{background:rgba(255,255,255,0.03);padding:14px 18px;border-radius:8px;min-width:80px}
+			.num{font-size:28px;font-weight:700;line-height:1}
+			.label{font-size:12px;color:var(--muted);margin-top:6px}
+			#message{margin-top:16px;color:var(--muted);font-size:14px}
+			@media (max-width:520px){.countdown{flex-wrap:wrap}.card{min-width:62px}}
+
+            img { 
+                max-width: 300px; 
+                margin-bottom: 20px; 
+            }
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<img src="Screwball_Logo_Screwball_White.png">
+
+			<div class="countdown" aria-live="polite" aria-atomic="true">
+				<div class="card" role="group" aria-labelledby="days-label">
+					<div id="days" class="num">—</div>
+					<div id="days-label" class="label">Days</div>
+				</div>
+
+				<div class="card" role="group" aria-labelledby="hours-label">
+					<div id="hours" class="num">—</div>
+					<div id="hours-label" class="label">Hours</div>
+				</div>
+
+				<div class="card" role="group" aria-labelledby="minutes-label">
+					<div id="minutes" class="num">—</div>
+					<div id="minutes-label" class="label">Minutes</div>
+				</div>
+
+				<div class="card" role="group" aria-labelledby="seconds-label">
+					<div id="seconds" class="num">—</div>
+					<div id="seconds-label" class="label">Seconds</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			// Countdown target: Nov 28, 2025 5:00 PM PST
+			// We encode the offset explicitly so the target moment is the intended local time in Pacific Standard Time.
+			const TARGET_ISO_PST = '2025-11-28T17:00:00-08:00';
+			const target = new Date(TARGET_ISO_PST);
+
+			const elDays = document.getElementById('days');
+			const elHours = document.getElementById('hours');
+			const elMinutes = document.getElementById('minutes');
+			const elSeconds = document.getElementById('seconds');
+			const elMessage = document.getElementById('message');
+
+			function plural(n, word){
+				return n === 1 ? word : word + 's';
+			}
+
+			function updateCountdown(){
+				const now = new Date();
+				let diff = Math.floor((target - now) / 1000); // seconds
+
+				if (isNaN(diff)) {
+					elMessage.textContent = 'Countdown target is invalid.';
+					return;
+				}
+
+				if (diff <= 0) {
+					elDays.textContent = '0';
+					elHours.textContent = '00';
+					elMinutes.textContent = '00';
+					elSeconds.textContent = '00';
+					elMessage.textContent = 'The time has arrived.';
+					clearInterval(timer);
+					return;
+				}
+
+				const days = Math.floor(diff / 86400);
+				diff -= days * 86400;
+				const hours = Math.floor(diff / 3600);
+				diff -= hours * 3600;
+				const minutes = Math.floor(diff / 60);
+				const seconds = diff - minutes * 60;
+
+				elDays.textContent = String(days);
+				elHours.textContent = String(hours).padStart(2, '0');
+				elMinutes.textContent = String(minutes).padStart(2, '0');
+				elSeconds.textContent = String(seconds).padStart(2, '0')
+			}
+
+			updateCountdown();
+			const timer = setInterval(updateCountdown, 1000);
+		</script>
+	</body>
+</html>
+
