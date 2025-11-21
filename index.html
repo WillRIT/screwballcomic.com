@@ -40,6 +40,12 @@
 			.clock .countdown{position:relative;z-index:2;width:auto;display:flex;gap:12px;justify-content:center;align-items:center;transform-origin:center center;transition:transform 160ms ease}
 			.clock-outline{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:3;pointer-events:none}
 
+			/* Launch button (shown after countdown ends) */
+			.launch-container{grid-column:2;grid-row:2;display:flex;justify-content:center;align-items:center;min-height:240px}
+			.launch-btn{background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff;text-decoration:none;font-family:'Rawer Condensed',sans-serif;font-weight:700;font-size:20px;padding:16px 32px;border-radius:40px;letter-spacing:.5px;box-shadow:0 6px 18px rgba(0,0,0,.4);transition:transform .2s ease,box-shadow .2s ease}
+			.launch-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.5)}
+			.launch-btn:active{transform:translateY(0);box-shadow:0 4px 12px rgba(0,0,0,.4)}
+
 			/* Fonts */
 			@font-face{font-family:'Rawer Condensed';src:url('fonts/Rawer Condensed Bold.otf') format('opentype');font-weight:700;font-style:normal;font-display:swap}
 			@font-face{font-family:'TT Octosquares';src:url('fonts/TT Octosquares Trial Compressed Light.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
@@ -94,6 +100,7 @@
 			const clockEl = document.querySelector('.clock');
 			const countdownEl = clockEl ? clockEl.querySelector('.countdown') : null;
 			const BG_SIZE_PERCENT = 0.92;
+      const TARGET_URL = 'https://www.webtoons.com/en/ACTION/SCREWBALL/list?title'; // CHANGE THIS to your destination
 
 			function adjustCountdownScale(){
 				if(!clockEl || !countdownEl) return;
@@ -112,7 +119,21 @@
 			function updateCountdown(){
 				const now = new Date();
 				let diff = Math.floor((target - now) / 1000);
-				if(diff <= 0){ elDays.textContent='0'; elHours.textContent='00'; elMinutes.textContent='00'; elSeconds.textContent='00'; return }
+				if(diff <= 0){
+					// Final values
+					elDays.textContent='0'; elHours.textContent='00'; elMinutes.textContent='00'; elSeconds.textContent='00';
+					// Replace clock with launch button
+					clearInterval(timer);
+					clearInterval(scaleInterval);
+					if(countdownEl){ countdownEl.style.transform='scale(1)'; }
+					if(clockEl){
+						const launch = document.createElement('div');
+						launch.className='launch-container';
+						launch.innerHTML = `<a class="launch-btn" href="${TARGET_URL}" target="_blank" rel="noopener">Enter Site</a>`;
+						clockEl.replaceWith(launch);
+					}
+					return;
+				}
 				const days = Math.floor(diff/86400); diff -= days*86400;
 				const hours = Math.floor(diff/3600); diff -= hours*3600;
 				const minutes = Math.floor(diff/60); const seconds = diff - minutes*60;
